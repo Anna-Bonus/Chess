@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ChessFigureType(Enum):
+class ChessPieceType(Enum):
     Pawn = 1
     Rook = 2
     Knight = 3
