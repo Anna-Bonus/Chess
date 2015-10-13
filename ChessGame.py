@@ -91,6 +91,17 @@ class ChessGame:
                     return False
         return True
 
+    def is_king_move_correct(self, source_x, source_y, destination_x, destination_y):
+        # Проверим, что в пункте назначения не стоит фигура того же цвета, что и наша
+        if not self.board.is_empty(destination_x, destination_y):
+            if self.board.get_piece(source_x, source_y).get_color() == self.board.get_piece(destination_x, destination_y).get_color():
+                return False
+        difference_x = destination_x - source_x # перемещение вдоль оси Х
+        difference_y = destination_y - source_y # перемещение вдоль оси Y
+        if abs(difference_x) <= 1 and abs(difference_y) <= 1:
+            return True
+        return False
+
 
 class ChessGameTest(unittest.TestCase):
     def setUp(self):
@@ -171,6 +182,26 @@ class ChessGameTest(unittest.TestCase):
         self.assertFalse(self.game.is_rook_move_correct(4, 3, 4, 0))
         self.game.board.set_piece(4, 0, ChessPiece(ChessColor.Black, ChessPieceType.King))
         self.assertTrue(self.game.is_rook_move_correct(4, 3, 4, 0))
+
+    def test_king_movement_correct(self):
+        self.assertFalse(self.game.is_king_move_correct(4, 0, 4, 1))
+        self.assertTrue(self.game.is_king_move_correct(4, 1, 4, 2))
+        self.assertTrue(self.game.is_king_move_correct(4, 1, 5, 2))
+        self.game.board.set_piece(4, 3, ChessPiece(ChessColor.Black, ChessPieceType.King))
+        self.assertFalse(self.game.is_king_move_correct(4, 3, 4, 1))
+        self.assertTrue(self.game.is_king_move_correct(4, 3, 4, 2))
+        self.game.move(4, 1, 4, 2)
+        self.assertTrue(self.game.is_king_move_correct(4, 3, 4, 2))
+        self.assertTrue(self.game.is_king_move_correct(4, 3, 5, 4))
+        self.game.board.set_piece(5, 4, ChessPiece(ChessColor.Black, ChessPieceType.Knight))
+        self.assertFalse(self.game.is_king_move_correct(4, 3, 5, 4))
+        self.game.board.set_piece(3, 3, ChessPiece(ChessColor.White, ChessPieceType.Pawn))
+        self.assertTrue(self.game.is_king_move_correct(4, 3, 3, 3))
+        
+
+
+
+
 
 
 if __name__ == '__main__':
