@@ -22,6 +22,8 @@ class ChessPiece:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return self.type
 
 if __name__ == '__main__':
     piece1 = ChessPiece(ChessColor.White, ChessPieceType.Bishop)
