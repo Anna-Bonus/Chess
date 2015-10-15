@@ -15,8 +15,7 @@ def sign(x):
         return 1
     if x < 0:
         return -1
-    if x == 0:
-        return 0
+    return 0
 
 
 class ChessGame:
@@ -42,17 +41,17 @@ class ChessGame:
             for j in range(0, 8):
                 if not self.board.is_empty(i, j):
                     if self.board.get_piece(i, j) == ChessPiece(color, ChessPieceType.King):
-                        return (i, j)
+                        return i, j
 
 
-    #
-    # def is_check_for_white(self):
-    #     (king_x, king_y) = self.where_is_king(ChessColor.White)
-    #     for i in range(0, 8):
-    #         for j in range(0, self.board.BOARD_SIZE):
-    #             if self.is_move_correct(i, j, king_x, king_y):
-    #                 return True
-    #     return False
+
+    def is_check_for_white(self):
+        (king_x, king_y) = self.where_is_king(ChessColor.White)
+        for i in range(0, 8):
+            for j in range(0, self.board.BOARD_SIZE):
+                if self.is_move_correct(i, j, king_x, king_y):
+                    return True
+        return False
 
     def is_check_for_black(self):
         pass
@@ -138,25 +137,6 @@ class ChessGame:
                 return False
         return True
 
-        # Разберем 4 направления
-        # if difference_x < 0:
-        #     for i in range(destination_x + 1, source_x):
-        #         if not self.board.is_empty(i, source_y):
-        #             return False
-        # if difference_x > 0:
-        #     for i in range(source_x + 1, destination_x):
-        #         if not self.board.is_empty(i, source_y):
-        #             return False
-        # if difference_y > 0:
-        #     for j in range(source_y + 1, destination_y):
-        #         if not self.board.is_empty(source_x, j):
-        #             return False
-        # if difference_y < 0:
-        #     for j in range(destination_y + 1, source_y):
-        #         if not self.board.is_empty(source_x, j):
-        #             return False
-        # return True
-
     def is_king_move_correct(self, source_x, source_y, destination_x, destination_y):
         # Проверим, что в пункте назначения не стоит фигура того же цвета, что и наша
         if not self.board.is_empty(destination_x, destination_y):
@@ -180,8 +160,6 @@ class ChessGame:
         if abs(destination_x - source_x) != abs(destination_y - source_y):
             return False
         # направление по осям
-        # factor_x = difference_x // abs(difference_x)
-        # factor_y = difference_y // abs(difference_y)
         factor_x = sign(difference_x)
         factor_y = sign(difference_y)
         for index in range(1, abs(difference_x)):
@@ -205,13 +183,12 @@ class ChessGameTest(unittest.TestCase):
         self.assertTrue(self.game.is_pawn_move_correct(2, 1, 2, 2))
         self.assertEqual(self.game.board.get_piece(2, 1), ChessPiece(ChessColor.White, ChessPieceType.Pawn))
 
-        self.game.move(2, 1, 3, 4)
+        self.game.board.set_piece(3, 4, ChessPiece(ChessColor.White, ChessPieceType.Pawn))
         self.game.board.set_piece(4, 5, ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
         self.assertTrue(self.game.is_pawn_move_correct(4, 5, 3, 4))
 
         self.game.board.set_piece(4, 5, ChessPiece(ChessColor.White, ChessPieceType.Pawn))
         self.assertFalse(self.game.is_pawn_move_correct(3, 4, 4, 5))
-        self.assertTrue(self.game.board.is_empty(2, 1))
 
         self.game.board.set_piece(2, 3, ChessPiece(ChessColor.White, ChessPieceType.Pawn))
         self.assertFalse(self.game.is_pawn_move_correct(2, 3, 3, 4))
@@ -351,18 +328,26 @@ class ChessGameTest(unittest.TestCase):
         self.assertTrue(self.game.is_move_correct(0, 6, 0, 4))
         self.assertTrue(self.game.is_move_correct(0, 6, 0, 5))
         self.assertTrue(self.game.is_move_correct(1, 6, 1, 4))
+
         self.game.board.clear_square(3, 1)
         self.assertTrue(self.game.is_move_correct(3, 0, 3, 3))
-        # self.game.board.move_piece(3, 0, 3, 3)
+
         self.game.move(3, 0, 3, 3)
         self.assertTrue(self.game.is_move_correct(3, 3, 6, 6))
         self.assertFalse(self.game.is_move_correct(3, 3, 7, 6))
         self.assertTrue(self.game.is_move_correct(3, 3, 3, 6))
         self.assertFalse(self.game.is_move_correct(3, 3, 5, 1))
+
         self.game.board.clear_square(5, 1)
         self.assertTrue(self.game.is_move_correct(3, 3, 5, 1))
+
         self.game.board.set_piece(5, 1, ChessPiece(ChessColor.Black, ChessPieceType.Bishop))
         self.assertTrue(self.game.is_move_correct(3, 3, 5, 1))
+        self.assertTrue(self.game.is_move_correct(5, 1, 6, 0))
+        self.assertFalse(self.game.is_move_correct(5, 1, 2, 4))
+
+        self.assertTrue(self.game.is_move_correct(6, 0, 5, 2))
+        self.assertFalse(self.game.is_move_correct(6, 0, 4, 1))
 
 
 if __name__ == '__main__':
