@@ -43,19 +43,21 @@ class ChessGame:
                     if self.board.get_piece(i, j) == ChessPiece(color, ChessPieceType.King):
                         return i, j
 
-
-
     def is_check_for_white(self):
         (king_x, king_y) = self.where_is_king(ChessColor.White)
         for i in range(0, 8):
-            for j in range(0, self.board.BOARD_SIZE):
+            for j in range(0, 8):
                 if self.is_move_correct(i, j, king_x, king_y):
                     return True
         return False
 
     def is_check_for_black(self):
-        pass
-
+        (king_x, king_y) = self.where_is_king(ChessColor.Black)
+        for i in range(0, 8):
+            for j in range(0, 8):
+                if self.is_move_correct(i, j, king_x, king_y):
+                    return True
+        return False
     # Проверяет, что
     # в клетке [source] есть фигура
     # если в клетке [destination] есть фигура, то она другого цвета
@@ -194,6 +196,10 @@ class ChessGameTest(unittest.TestCase):
         self.assertFalse(self.game.is_pawn_move_correct(2, 3, 3, 4))
         self.assertTrue(self.game.is_pawn_move_correct(7, 6, 7, 4))
         self.assertTrue(self.game.is_pawn_move_correct(7, 6, 7, 5))
+
+        self.game.board.set_piece(7, 5, ChessPiece(ChessColor.White, ChessPieceType.King))
+        self.assertFalse(self.game.is_pawn_move_correct(7, 6, 7, 4))
+        self.assertFalse(self.game.is_pawn_move_correct(7, 6, 7, 5))
 
     def test_knight_movement_correct(self):
         self.assertTrue(self.game.is_knight_move_correct(1, 0, 2, 2))
@@ -348,6 +354,25 @@ class ChessGameTest(unittest.TestCase):
 
         self.assertTrue(self.game.is_move_correct(6, 0, 5, 2))
         self.assertFalse(self.game.is_move_correct(6, 0, 4, 1))
+
+    def test_is_check(self):
+        self.assertFalse(self.game.is_check_for_white())
+        self.assertFalse(self.game.is_check_for_black())
+
+        self.game.board.set_piece(4, 4, ChessPiece(ChessColor.White, ChessPieceType.King))
+        self.game.board.clear_square(4, 0)
+        self.assertFalse(self.game.is_check_for_white())
+        self.assertFalse(self.game.is_check_for_black())
+
+        self.game.move(4, 4, 4, 5)
+        self.assertTrue(self.game.is_check_for_white())
+        self.assertFalse(self.game.is_check_for_black())
+
+        self.game.move(4, 5, 4, 4)
+        self.game.board.set_piece(5, 4, ChessPiece(ChessColor.Black, ChessPieceType.King))
+        self.game.board.clear_square(4, 7)
+        self.assertTrue(self.game.is_check_for_white())
+        self.assertTrue(self.game.is_check_for_black())
 
 
 if __name__ == '__main__':
