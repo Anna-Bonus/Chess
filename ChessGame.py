@@ -9,6 +9,13 @@ from Player import Player
 
 __author__ = 'Анечка'
 
+def sign(x):
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    if x == 0:
+        return 0
 
 class ChessGame:
     def __init__(self, player_white, player_black):
@@ -99,24 +106,35 @@ class ChessGame:
         # Если движение не по одной оси, ладья не может сходить так
         if (difference_x * difference_y != 0) or (difference_x + difference_y == 0):
             return False
-        # Разберем 4 направления
-        if difference_x < 0:
-            for i in range(destination_x + 1, source_x):
-                if not self.board.is_empty(i, source_y):
-                    return False
-        if difference_x > 0:
-            for i in range(source_x + 1, destination_x):
-                if not self.board.is_empty(i, source_y):
-                    return False
-        if difference_y > 0:
-            for j in range(source_y + 1, destination_y):
-                if not self.board.is_empty(source_x, j):
-                    return False
-        if difference_y < 0:
-            for j in range(destination_y + 1, source_y):
-                if not self.board.is_empty(source_x, j):
-                    return False
+        # направление по осям
+        factor_x = sign(difference_x)
+        factor_y = sign(difference_y)
+        for index in range(1, abs(difference_x)):
+            if not self.board.is_empty(source_x + factor_x * index, source_y + factor_y * index):
+                return False
+        for index in range(1, abs(difference_y)):
+            if not self.board.is_empty(source_x + factor_x * index, source_y + factor_y * index):
+                return False
         return True
+
+        # Разберем 4 направления
+        # if difference_x < 0:
+        #     for i in range(destination_x + 1, source_x):
+        #         if not self.board.is_empty(i, source_y):
+        #             return False
+        # if difference_x > 0:
+        #     for i in range(source_x + 1, destination_x):
+        #         if not self.board.is_empty(i, source_y):
+        #             return False
+        # if difference_y > 0:
+        #     for j in range(source_y + 1, destination_y):
+        #         if not self.board.is_empty(source_x, j):
+        #             return False
+        # if difference_y < 0:
+        #     for j in range(destination_y + 1, source_y):
+        #         if not self.board.is_empty(source_x, j):
+        #             return False
+        # return True
 
     def is_king_move_correct(self, source_x, source_y, destination_x, destination_y):
         # Проверим, что в пункте назначения не стоит фигура того же цвета, что и наша
@@ -141,8 +159,10 @@ class ChessGame:
         if abs(destination_x - source_x) != abs(destination_y - source_y):
             return False
         # направление по осям
-        factor_x = difference_x // abs(difference_x)
-        factor_y = difference_y // abs(difference_y)
+        # factor_x = difference_x // abs(difference_x)
+        # factor_y = difference_y // abs(difference_y)
+        factor_x = sign(difference_x)
+        factor_y = sign(difference_y)
         for index in range(1, abs(difference_x)):
             if not self.board.is_empty(source_x + factor_x * index, source_y + factor_y * index):
                 return False
