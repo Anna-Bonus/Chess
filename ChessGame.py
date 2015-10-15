@@ -58,6 +58,7 @@ class ChessGame:
                 if self.is_move_correct(i, j, king_x, king_y):
                     return True
         return False
+
     # Проверяет, что
     # в клетке [source] есть фигура
     # если в клетке [destination] есть фигура, то она другого цвета
@@ -373,6 +374,22 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.clear_square(4, 7)
         self.assertTrue(self.game.is_check_for_white())
         self.assertTrue(self.game.is_check_for_black())
+
+    def test_move(self):
+        self.game.move(4, 1, 4, 3)
+        self.game.move(4, 6, 4, 5)
+        self.game.move(5, 0, 0, 5)
+        self.game.move(1, 6, 0, 5)
+        self.game.move(3, 0, 6, 3)
+        self.assertTrue(self.game.board.is_empty(3, 0))
+        self.assertTrue(self.game.board.is_empty(4, 1))
+        self.assertTrue(self.game.board.is_empty(5, 0))
+        self.assertTrue(self.game.board.is_empty(1, 6))
+        self.assertTrue(self.game.board.is_empty(4, 6))
+        self.assertEqual(self.game.board.get_piece(0, 5), ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
+        self.assertEqual(self.game.board.get_piece(4, 5), ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
+        self.assertEqual(self.game.board.get_piece(4, 3), ChessPiece(ChessColor.White, ChessPieceType.Pawn))
+        self.assertEqual(self.game.board.get_piece(6, 3), ChessPiece(ChessColor.White, ChessPieceType.Queen))
 
 
 if __name__ == '__main__':
