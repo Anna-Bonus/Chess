@@ -44,6 +44,14 @@ class ChessBoard:
         self.set_piece(fin_x, fin_y, moved_piece)
         # exception наличия фигуры
 
+    def find_king(self, color):
+        chess_king = ChessPiece(color, ChessPieceType.King)
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if not self.is_empty(i, j):
+                    if self.get_piece(i, j) == chess_king:
+                        return i, j
+
     def set_start_position(self):
         next_piece = ChessPiece(ChessColor.White, ChessPieceType.Rook)
         self.set_piece(0, 0, next_piece)
@@ -112,6 +120,15 @@ class ChessBoardTest(unittest.TestCase):
         board.move_piece(0, 1, 3, 2)
         self.assertEqual(board.get_piece(3, 2), ChessPiece(ChessColor.White, ChessPieceType.Pawn))
         self.assertTrue(board.is_empty(0, 1))
+
+    def test_find_king(self):
+        board = ChessBoard()
+        board.set_start_position()
+        self.assertTrue(board.find_king(ChessColor.White) == (4, 0))
+        self.assertTrue(board.find_king(ChessColor.Black) == (4, 7))
+        self.assertFalse(board.find_king(ChessColor.White) == (5, 3))
+        self.assertFalse(board.find_king(ChessColor.White) == (0, 3))
+        self.assertFalse(board.find_king(ChessColor.White) == (5, 2))
 
 if __name__ == '__main__':
     unittest.main()
