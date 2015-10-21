@@ -6,6 +6,7 @@ from ChessPiece import ChessPiece
 from ChessPieceType import ChessPieceType
 from Player import Player
 from utils import sign
+from ChessException import ChessException
 
 
 __author__ = 'Анечка'
@@ -35,9 +36,22 @@ class ChessGame:
             ChessPieceType.Knight: self.is_knight_move_correct}
 
     def move(self, source_x, source_y, destination_x, destination_y):
+        if not self.board.is_empty(source_x, source_y):
+            source_piece = self.board.get_piece(source_x, source_y)
+        else:
+            raise ChessException
         if self.is_move_correct(source_x, source_y, destination_x, destination_y):
+            # Если это рокировка, то ладью тоже нужно передвинуть
+            if self.check_castling(source_x, source_y, destination_x, destination_y):
+                difference_x = destination_x - source_x
+                if difference_x < 0:
+                    rook_x = 0
+                else:
+                    rook_x = BOARD_SIZE - 1
+                self.board.move_piece(rook_x, source_y, 3 + rook_x // 7 * 2, source_y)
             self.board.move_piece(source_x, source_y, destination_x, destination_y)
             self.move_number += 1
+            # Если ход был сделан Ладьей или Королем, исключаем дальнейшую возможность соответствующих рокировок
             if (source_x, source_y) == (0, 0) or (source_x, source_y) == (4, 0):
                 self.possible_white_long_castling = False
             if (source_x, source_y) == (7, 0) or (source_x, source_y) == (4, 0):
@@ -70,11 +84,9 @@ class ChessGame:
                 return False
         piece_type = self.board.get_piece(source_x, source_y).get_type()
         # Check the castling
-        if piece_type == ChessPieceType.King:
-            if self.check_castling(source_x, source_y, destination_x, destination_y, source_color):
-                return True
-        result = self.move_correct_checkers[piece_type](source_x, source_y, destination_x, destination_y)
-        return result
+        if self.check_castling(source_x, source_y, destination_x, destination_y):
+            return True
+        return self.move_correct_checkers[piece_type](source_x, source_y, destination_x, destination_y)
 
     def can_be_attacked(self, x, y, color):
         result = False
@@ -90,7 +102,11 @@ class ChessGame:
             self.board.clear_square(x, y)
         return result
 
-    def check_castling(self, source_x, source_y, destination_x, destination_y, source_color):
+    def check_castling(self, source_x, source_y, destination_x, destination_y):
+        if self.board.is_empty(source_x, source_y):
+            return False
+        if self.board.get_piece(source_x, source_y).get_type() != ChessPieceType.King:
+            return False
         difference_x = destination_x - source_x
         difference_y = destination_y - source_y
         if abs(difference_x) != 2 or difference_y != 0:
@@ -107,7 +123,7 @@ class ChessGame:
         # Проверка, что король не под шахом и поле, пересекаемое или занимаемое им, не атаковано
         for i in [0, 1, 2]:
             checking_square = [source_x + factor_x * i, source_y]
-            if self.can_be_attacked(checking_square[0], checking_square[1], source_color):
+            if self.can_be_attacked(checking_square[0], checking_square[1], self.board.get_piece(source_x, source_y).get_color()):
                 return False
         # Проверяем, что данные ладья и король не делали свой ход
         if (source_x, source_y, destination_x, destination_y) == (4, 0, 2, 0) and self.possible_white_long_castling:
@@ -442,7 +458,7 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.set_piece(4, 0, ChessPiece(ChessColor.White, ChessPieceType.King))
         self.game.board.set_piece(0, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
         self.game.board.set_piece(7, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
-        self.assertTrue(self.game.check_castling(4, 0, 2, 0, ChessColor.White))
+        self.assertTrue(self.game.check_castling(4, 0, 2, 0))
         self.assertTrue(self.game.is_move_correct(4, 0, 2, 0))
 
         self.game.move(4, 0, 4, 1)
@@ -459,7 +475,7 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.set_piece(4, 7, ChessPiece(ChessColor.Black, ChessPieceType.King))
         self.game.board.set_piece(0, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
         self.game.board.set_piece(7, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
-        self.assertTrue(self.game.check_castling(4, 7, 2, 7, ChessColor.Black))
+        self.assertTrue(self.game.check_castling(4, 7, 2, 7))
         self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
 
         self.game.move(4, 7, 4, 6)
@@ -476,6 +492,14 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.set_piece(2, 6, ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
         self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
         self.game.board.set_piece(2, 7, ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
+        self.assertFalse(self.game.is_move_correct(4, 7, 2, 7))
+
+        self.assertTrue(self.game.is_move_correct(4, 7, 6, 7))
+        self.game.move(4, 7, 6, 7)
+        self.assertEqual(self.game.board.get_piece(6, 7), ChessPiece(ChessColor.Black, ChessPieceType.King))
+        self.assertEqual(self.game.board.get_piece(5, 7), ChessPiece(ChessColor.Black, ChessPieceType.Rook))
+        self.assertTrue(self.game.board.is_empty(4, 7))
+        self.assertTrue(self.game.board.is_empty(7, 7))
         self.assertFalse(self.game.is_move_correct(4, 7, 2, 7))
 
 

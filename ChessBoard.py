@@ -52,16 +52,6 @@ class ChessBoard:
                     if self.get_piece(i, j) == chess_king:
                         return i, j
 
-    def whether_go_here(self, color, destination_x, destination_y):
-        result = False
-        attaking_color = color
-        if attaking_color == ChessColor.White:
-            attacked_color = ChessColor.Black
-        else:
-            attacked_color = ChessColor.White
-        self.set_piece(destination_x, destination_y, )
-        self.set_piece(destination_x, destination_y)
-
     def set_start_position(self):
         next_piece = ChessPiece(ChessColor.White, ChessPieceType.Rook)
         self.set_piece(0, 0, next_piece)
