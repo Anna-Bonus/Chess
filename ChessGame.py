@@ -36,29 +36,27 @@ class ChessGame:
             ChessPieceType.Knight: self.is_knight_move_correct}
 
     def move(self, source_x, source_y, destination_x, destination_y):
-        if not self.board.is_empty(source_x, source_y):
-            source_piece = self.board.get_piece(source_x, source_y)
-        else:
-            raise ChessException
+        if self.board.is_empty(source_x, source_y):
+            raise ChessException()
         if self.is_move_correct(source_x, source_y, destination_x, destination_y):
             # Если это рокировка, то ладью тоже нужно передвинуть
             if self.check_castling(source_x, source_y, destination_x, destination_y):
-                difference_x = destination_x - source_x
-                if difference_x < 0:
+                if destination_x < source_x:
                     rook_x = 0
                 else:
                     rook_x = BOARD_SIZE - 1
-                self.board.move_piece(rook_x, source_y, 3 + rook_x // 7 * 2, source_y)
+                    # destination_x может быть равна только 3 или 5
+                self.board.move_piece(rook_x, source_y, 3 + 2 * sign(rook_x), source_y)
             self.board.move_piece(source_x, source_y, destination_x, destination_y)
             self.move_number += 1
             # Если ход был сделан Ладьей или Королем, исключаем дальнейшую возможность соответствующих рокировок
-            if (source_x, source_y) == (0, 0) or (source_x, source_y) == (4, 0):
+            if (source_x, source_y) == (0, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (0, 0):
                 self.possible_white_long_castling = False
-            if (source_x, source_y) == (7, 0) or (source_x, source_y) == (4, 0):
+            if (source_x, source_y) == (7, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (7, 0):
                 self.possible_white_short_castling = False
-            if (source_x, source_y) == (0, 7) or (source_x, source_y) == (4, 7):
+            if (source_x, source_y) == (0, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (0, 7):
                 self.possible_black_long_castling = False
-            if (source_x, source_y) == (7, 7) or (source_x, source_y) == (4, 7):
+            if (source_x, source_y) == (7, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (7, 7):
                 self.possible_black_short_castling = False
 
     def whose_turn(self):
@@ -114,14 +112,12 @@ class ChessGame:
         factor_x = sign(difference_x)
         # Проверям, что на пути от короля до ладьи ничего не стоит
         checking_square = [source_x + factor_x, source_y]
-        displacement = 0
-        while self.board.is_empty(checking_square[0], checking_square[1]) and displacement < 3:
+        while self.board.is_empty(*checking_square) and 0 <= checking_square[0] < BOARD_SIZE:
             checking_square[0] += factor_x
-            displacement += 1
-        if self.board.get_piece(checking_square[0], checking_square[1]).get_type() != ChessPieceType.Rook:
+        if self.board.get_piece(*checking_square).get_type() != ChessPieceType.Rook:
             return False
         # Проверка, что король не под шахом и поле, пересекаемое или занимаемое им, не атаковано
-        for i in [0, 1, 2]:
+        for i in range(3):
             checking_square = [source_x + factor_x * i, source_y]
             if self.can_be_attacked(checking_square[0], checking_square[1], self.board.get_piece(source_x, source_y).get_color()):
                 return False
