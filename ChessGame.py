@@ -54,11 +54,7 @@ class ChessGame:
 
     def is_check(self, color):
         (king_x, king_y) = self.board.find_king(color)
-        for i in range(BOARD_SIZE):
-            for j in range(BOARD_SIZE):
-                if self.is_move_correct(i, j, king_x, king_y):
-                    return True
-        return False
+        return self.can_be_attacked(king_x, king_y, color)
 
     # Проверяет, что
     # в клетке [source] есть фигура
@@ -75,24 +71,58 @@ class ChessGame:
         piece_type = self.board.get_piece(source_x, source_y).get_type()
         # Check the castling
         if piece_type == ChessPieceType.King:
-            difference_x = destination_x - source_x
-            difference_y = destination_y - source_y
-            # Если это не рокировка, то рассматриваем короля как обычно
-            if abs(difference_x) != 2 or difference_y != 0:
-                return self.is_king_move_correct(source_x, source_y, destination_x, destination_y)
-            factor_x = sign(difference_x)
-            # Проверка, что между королем и пунктом назначения ничего нет
-            for index in range(1, abs(difference_x)):
-                if not self.board.is_empty(source_x + factor_x * index, source_y):
-                    return False
-            return False
+            if self.check_castling(source_x, source_y, destination_x, destination_y, source_color):
+                return True
         result = self.move_correct_checkers[piece_type](source_x, source_y, destination_x, destination_y)
         return result
+
+    def can_be_attacked(self, x, y, color):
+        result = False
+        substitution_done = False
+        if self.board.is_empty(x, y):
+            self.board.set_piece(x, y, ChessPiece(color, ChessPieceType.Pawn))
+            substitution_done = True
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if self.is_move_correct(i, j, x, y):
+                    result = True
+        if substitution_done:
+            self.board.clear_square(x, y)
+        return result
+
+    def check_castling(self, source_x, source_y, destination_x, destination_y, source_color):
+        difference_x = destination_x - source_x
+        difference_y = destination_y - source_y
+        if abs(difference_x) != 2 or difference_y != 0:
+            return False
+        factor_x = sign(difference_x)
+        # Проверям, что на пути от короля до ладьи ничего не стоит
+        checking_square = [source_x + factor_x, source_y]
+        displacement = 0
+        while self.board.is_empty(checking_square[0], checking_square[1]) and displacement < 3:
+            checking_square[0] += factor_x
+            displacement += 1
+        if self.board.get_piece(checking_square[0], checking_square[1]).get_type() != ChessPieceType.Rook:
+            return False
+        # Проверка, что король не под шахом и поле, пересекаемое или занимаемое им, не атаковано
+        for i in [0, 1, 2]:
+            checking_square = [source_x + factor_x * i, source_y]
+            if self.can_be_attacked(checking_square[0], checking_square[1], source_color):
+                return False
+        # Проверяем, что данные ладья и король не делали свой ход
+        if (source_x, source_y, destination_x, destination_y) == (4, 0, 2, 0) and self.possible_white_long_castling:
+            return True
+        if (source_x, source_y, destination_x, destination_y) == (4, 0, 6, 0) and self.possible_white_short_castling:
+            return True
+        if (source_x, source_y, destination_x, destination_y) == (4, 7, 2, 7) and self.possible_black_long_castling:
+            return True
+        if (source_x, source_y, destination_x, destination_y) == (4, 7, 6, 7) and self.possible_black_short_castling:
+            return True
+        return False
 
     def is_pawn_move_correct(self, source_x, source_y, destination_x, destination_y):
         pawn = self.board.get_piece(source_x, source_y)
         color_pawn = pawn.get_color()
-
         if source_x == destination_x and self.board.is_empty(destination_x, destination_y):
             if (source_y - destination_y == 1) and (color_pawn == ChessColor.Black):
                 return True
@@ -386,6 +416,67 @@ class ChessGameTest(unittest.TestCase):
         self.assertEqual(self.game.board.get_piece(4, 5), ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
         self.assertEqual(self.game.board.get_piece(4, 3), ChessPiece(ChessColor.White, ChessPieceType.Pawn))
         self.assertEqual(self.game.board.get_piece(6, 3), ChessPiece(ChessColor.White, ChessPieceType.Queen))
+
+    def test_can_be_attacked(self):
+        self.game.move(4, 1, 4, 3)
+        self.game.move(4, 6, 4, 4)
+        self.game.move(5, 0, 0, 5)
+        self.game.move(3, 7, 6, 4)
+
+        self.assertTrue(self.game.can_be_attacked(1, 6, ChessColor.Black))
+        self.assertTrue(self.game.can_be_attacked(0, 5, ChessColor.White))
+        self.assertTrue(self.game.can_be_attacked(6, 1, ChessColor.White))
+        self.assertTrue(self.game.can_be_attacked(3, 1, ChessColor.White))
+        self.assertTrue(self.game.can_be_attacked(5, 4, ChessColor.Black))
+        self.assertTrue(self.game.can_be_attacked(2, 3, ChessColor.Black))
+
+        self.assertFalse(self.game.can_be_attacked(2, 0, ChessColor.White))
+        self.assertFalse(self.game.can_be_attacked(5, 6, ChessColor.White))
+        self.assertFalse(self.game.can_be_attacked(5, 6, ChessColor.Black))
+        self.assertFalse(self.game.can_be_attacked(3, 4, ChessColor.White))
+
+    def test_castling(self):
+        self.assertFalse(self.game.is_move_correct(4, 0, 2, 0))
+        self.game.board.clear_board()
+
+        self.game.board.set_piece(4, 0, ChessPiece(ChessColor.White, ChessPieceType.King))
+        self.game.board.set_piece(0, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
+        self.game.board.set_piece(7, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
+        self.assertTrue(self.game.check_castling(4, 0, 2, 0, ChessColor.White))
+        self.assertTrue(self.game.is_move_correct(4, 0, 2, 0))
+
+        self.game.move(4, 0, 4, 1)
+        self.game.move(4, 1, 4, 0)
+        self.assertFalse(self.game.is_move_correct(4, 0, 2, 0))
+        self.assertFalse(self.game.is_move_correct(4, 0, 6, 0))
+        self.game.possible_white_long_castling = True
+        self.game.possible_white_short_castling = True
+        self.assertTrue(self.game.is_move_correct(4, 0, 2, 0))
+        self.assertTrue(self.game.is_move_correct(4, 0, 6, 0))
+
+        self.game.board.clear_board()
+
+        self.game.board.set_piece(4, 7, ChessPiece(ChessColor.Black, ChessPieceType.King))
+        self.game.board.set_piece(0, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
+        self.game.board.set_piece(7, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
+        self.assertTrue(self.game.check_castling(4, 7, 2, 7, ChessColor.Black))
+        self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
+
+        self.game.move(4, 7, 4, 6)
+        self.game.move(4, 6, 4, 7)
+        self.assertFalse(self.game.is_move_correct(4, 7, 2, 7))
+        self.assertFalse(self.game.is_move_correct(4, 7, 6, 7))
+        self.game.possible_black_long_castling = True
+        self.game.possible_black_short_castling = True
+        self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
+        self.assertTrue(self.game.is_move_correct(4, 7, 6, 7))
+
+        self.game.board.set_piece(2, 6, ChessPiece(ChessColor.White, ChessPieceType.Pawn))
+        self.assertFalse(self.game.is_move_correct(4, 7, 2, 7))
+        self.game.board.set_piece(2, 6, ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
+        self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
+        self.game.board.set_piece(2, 7, ChessPiece(ChessColor.Black, ChessPieceType.Pawn))
+        self.assertFalse(self.game.is_move_correct(4, 7, 2, 7))
 
 
 if __name__ == '__main__':

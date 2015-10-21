@@ -52,6 +52,16 @@ class ChessBoard:
                     if self.get_piece(i, j) == chess_king:
                         return i, j
 
+    def whether_go_here(self, color, destination_x, destination_y):
+        result = False
+        attaking_color = color
+        if attaking_color == ChessColor.White:
+            attacked_color = ChessColor.Black
+        else:
+            attacked_color = ChessColor.White
+        self.set_piece(destination_x, destination_y, )
+        self.set_piece(destination_x, destination_y)
+
     def set_start_position(self):
         next_piece = ChessPiece(ChessColor.White, ChessPieceType.Rook)
         self.set_piece(0, 0, next_piece)
@@ -72,6 +82,11 @@ class ChessBoard:
                 new_piece = copy.copy(self.get_piece(i, BOARD_SIZE - j - 1))
                 new_piece.color = ChessColor.Black
                 self.set_piece(i, j, new_piece)
+
+    def clear_board(self):
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                self.clear_square(i, j)
 
 
 class ChessBoardTest(unittest.TestCase):
@@ -129,6 +144,14 @@ class ChessBoardTest(unittest.TestCase):
         self.assertFalse(board.find_king(ChessColor.White) == (5, 3))
         self.assertFalse(board.find_king(ChessColor.White) == (0, 3))
         self.assertFalse(board.find_king(ChessColor.White) == (5, 2))
+
+    def test_clear_board(self):
+        board = ChessBoard()
+        board.set_start_position()
+        board.clear_board()
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                self.assertTrue(board.is_empty(i, j))
 
 if __name__ == '__main__':
     unittest.main()
