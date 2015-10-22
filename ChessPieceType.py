@@ -12,5 +12,11 @@ class ChessPieceType(Enum):
     def __str__(self):
         return self._name_
 
+    def get_short_name(self):
+        if self == ChessPieceType.Knight:
+            return "N"
+        return str(self)[0]
+        pass
+
 if __name__ == '__main__':
     pass
