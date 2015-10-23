@@ -37,7 +37,7 @@ class ChessGame:
 
     def move(self, source_x, source_y, destination_x, destination_y):
         if self.board.is_empty(source_x, source_y):
-            raise ChessException()
+            raise ChessException('Empty source square')
         if self.is_move_correct(source_x, source_y, destination_x, destination_y):
             # Если это рокировка, то ладью тоже нужно передвинуть
             if self.check_castling(source_x, source_y, destination_x, destination_y):
@@ -58,6 +58,8 @@ class ChessGame:
                 self.possible_black_long_castling = False
             if (source_x, source_y) == (7, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (7, 7):
                 self.possible_black_short_castling = False
+        else:
+            raise ChessException("Incorrect move")
 
     def whose_turn(self):
         if self.move_number % 2 == 0:
