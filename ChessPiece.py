@@ -11,7 +11,7 @@ class ChessPiece:
         self.type = piece_type
 
     def __str__(self):
-        return '(' + str(self.color) + ' ' + str(self.type) + ')'
+        return '' + str(self.color) + '_' + str(self.type) + ''
 
     def __eq__(self, other):
         return self.color == other.color and self.type == other.type
