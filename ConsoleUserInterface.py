@@ -9,6 +9,17 @@ LETTERS_ON_BOARD = string.ascii_lowercase[0:BOARD_SIZE]
 HORIZONTAL_BORDER = " +" + "=" * (BOARD_SIZE*3-1) + "+"
 
 
+def check_good_input(next_step, index1, index2, index3, index4):
+    source_x = LETTERS_ON_BOARD.find(next_step[index1])
+    destination_x = LETTERS_ON_BOARD.find(next_step[index3])
+    if source_x == -1 or destination_x == -1:
+        raise ChessException('invalid column')
+    source_y = int(next_step[index2])-1
+    destination_y = int(next_step[index4])-1
+    if not (-1 < source_y < 8 and -1 < destination_y < 8):
+        raise ChessException('Invalid row')
+    return source_x, source_y, destination_x, destination_y
+
 class ConsoleUserInterface:
     def __init__(self):
         player1 = Player('Helen', 'P')
@@ -35,18 +46,6 @@ class ConsoleUserInterface:
         print(' ', '  '.join(LETTERS_ON_BOARD), file=self.output)
         print(self.game.whose_turn(), 'turn', file=self.output)
 
-    @staticmethod
-    def check_good_input(next_step, index1, index2, index3, index4):
-        source_x = LETTERS_ON_BOARD.find(next_step[index1])
-        destinaton_x = LETTERS_ON_BOARD.find(next_step[index3])
-        if source_x == -1 or destinaton_x == -1:
-            raise ChessException('invalid column')
-        source_y = int(next_step[index2])-1
-        destinaton_y = int(next_step[index4])-1
-        if not (-1 < source_y < 8 and -1 < destinaton_y < 8):
-            raise ChessException('Invalid row')
-        return source_x, source_y, destinaton_x, destinaton_y
-
     def loop(self):
         print('Please, use the international notation for game and magic word \'exit\', if you want finish', file=self.output)
         while 1:
@@ -57,12 +56,12 @@ class ConsoleUserInterface:
             print(next_step)
             if len(next_step) == 5:
                 try:
-                    (source_x, source_y, destination_x, destination_y) = self.check_good_input(next_step, 0, 1, 3, 4)
+                    (source_x, source_y, destination_x, destination_y) = check_good_input(next_step, 0, 1, 3, 4)
                 except ChessException as e:
                     print('Error:', e, file=self.output)
             if 5 < len(next_step) < 8:
                 try:
-                    (source_x, source_y, destination_x, destination_y) = self.check_good_input(next_step, 1, 2, 4, 5)
+                    (source_x, source_y, destination_x, destination_y) = check_good_input(next_step, 1, 2, 4, 5)
                 except ChessException as e:
                     print('Error:', e, file=self.output)
             if next_step == 'exit':

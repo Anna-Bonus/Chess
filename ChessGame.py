@@ -7,6 +7,7 @@ from ChessPieceType import ChessPieceType
 from Player import Player
 from utils import sign
 from ChessException import ChessException
+import copy
 
 
 __author__ = 'Анечка'
@@ -22,6 +23,7 @@ class ChessGame:
         self.player_white = player_white
         self.player_black = player_black
         self.move_number = 1
+        self.previous_board = copy.deepcopy(self.board)
 
         self.possible_white_long_castling = True
         self.possible_white_short_castling = True
@@ -40,6 +42,7 @@ class ChessGame:
             raise ChessException('Empty source square')
         if self.is_move_correct(source_x, source_y, destination_x, destination_y):
             # Если это рокировка, то ладью тоже нужно передвинуть
+            #self.previous_board = copy.deepcopy(self.board)
             if self.check_castling(source_x, source_y, destination_x, destination_y):
                 if destination_x < source_x:
                     rook_x = 0
@@ -60,6 +63,21 @@ class ChessGame:
                 self.possible_black_short_castling = False
         else:
             raise ChessException("Incorrect move")
+        #print(self.squares_changed_last_move())
+
+    def squares_changed_last_move(self):
+        result = []
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if self.board.is_empty(i, j) + self.previous_board.is_empty(i, j) == 1:
+                    result.append((i, j))
+                    #print(i, j)
+                elif self.board.is_empty(i, j) + self.previous_board.is_empty(i, j) == 0:
+                    if self.board.get_piece(i, j) != self.previous_board.get_piece(i, j):
+                        result.append((i, j))
+                        #print(self.previous_board.get_piece(i, j), self.board.get_piece(i, j))
+        #print(result)
+        return result
 
     def whose_turn(self):
         if self.move_number % 2 == 0:
