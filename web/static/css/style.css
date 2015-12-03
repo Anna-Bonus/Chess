@@ -1,0 +1,20 @@
+img {
+    border: 1px solid white;
+}
+
+td {
+    padding: 0px;
+}
+
+img.selected {
+    border-color: green;
+}
+
+table {
+    display: inline-block;
+}
+
+.whose-turn {
+    display: inline-block;
+    vertical-align: top;
+}

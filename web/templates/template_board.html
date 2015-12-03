@@ -1,0 +1,29 @@
+<html>
+<head>
+      <title></title>
+      <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+      <table border="0" cellspacing="0">
+            {% for i in range(8) %}
+                  <tr>
+                        {% for j in range(8) %}
+                              {% if board.is_empty(j, 7-i) %}
+                                    {% set piece = none %}
+                              {% else %}
+                                    {% set piece = board.get_piece(j, 7-i) %}
+                              {% endif %}
+                              {% with piece=piece, color_square=board.get_square_color(j, 7-i), x=j, y=7-i %}
+                                    {% include "template_square.html" %}
+                              {% endwith %}
+                        {% endfor %}
+                  </tr>
+            {% endfor %}
+      </table>
+
+      <div class="whose-turn"></div>
+
+      <script src="/static/js/jquery-1.11.3.js"></script>
+      <script src="/static/js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% if color_square.get_short_name() == 'W' %}
+    {% set color = "#CCAA80" %}
+{% else %}
+    {% set color = "#FFDDBB" %}
+{% endif %}
+
+<td bgcolor={{color}} data-x={{x}} data-y={{y}}>
+    {% if piece is none %}
+        <img src="/static/images/Empty_Image.png">
+    {% else %}
+        <img src="/static/images/{{piece}}.png">
+    {% endif %}
+</td>

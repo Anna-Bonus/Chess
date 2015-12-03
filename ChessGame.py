@@ -8,8 +8,9 @@ from Player import Player
 from utils import sign
 from ChessException import ChessException
 import copy
+import string
 
-
+LETTERS_ON_BOARD = string.ascii_lowercase[0:BOARD_SIZE]
 __author__ = 'Анечка'
 
 
@@ -24,45 +25,91 @@ class ChessGame:
         self.player_black = player_black
         self.move_number = 1
         self.previous_board = copy.deepcopy(self.board)
+        self.result_notation_text = ''
+
+        self.is_white_check = False
+        self.is_black_check = False
 
         self.possible_white_long_castling = True
         self.possible_white_short_castling = True
         self.possible_black_long_castling = True
         self.possible_black_short_castling = True
 
-        self.move_correct_checkers = {ChessPieceType.Pawn: self.is_pawn_move_correct,
-            ChessPieceType.Rook: self.is_rook_move_correct,
-            ChessPieceType.Bishop: self.is_bishop_move_correct,
-            ChessPieceType.Queen: self.is_queen_move_is_correct,
-            ChessPieceType.King: self.is_king_move_correct,
-            ChessPieceType.Knight: self.is_knight_move_correct}
+        # self.move_correct_checkers = {ChessPieceType.Pawn: self.is_pawn_move_correct,
+        #     ChessPieceType.Rook: self.is_rook_move_correct,
+        #     ChessPieceType.Bishop: self.is_bishop_move_correct,
+        #     ChessPieceType.Queen: self.is_queen_move_is_correct,
+        #     ChessPieceType.King: self.is_king_move_correct,
+        #     ChessPieceType.Knight: self.is_knight_move_correct}
+
+    def can_this_color_fix_check(self, color):
+        if self.whose_turn() != color:
+            return False
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if not self.board.is_empty(i, j):
+                    if self.board.get_piece(i, j).get_color() == color:
+                        for k in range(BOARD_SIZE):
+                            for l in range(BOARD_SIZE):
+                                if self.is_move_correct(i, j, k, l):
+                                    self.board.move_piece(i, j, k, l)
+                                    if not self.is_check(color):
+                                        self.board.move_piece(k, l, i, j)
+                                        return True
+                                    self.board.move_piece(k, l, i, j)
+        return False
 
     def move(self, source_x, source_y, destination_x, destination_y):
         if self.board.is_empty(source_x, source_y):
             raise ChessException('Empty source square')
-        if self.is_move_correct(source_x, source_y, destination_x, destination_y):
-            # Если это рокировка, то ладью тоже нужно передвинуть
-            #self.previous_board = copy.deepcopy(self.board)
-            if self.check_castling(source_x, source_y, destination_x, destination_y):
-                if destination_x < source_x:
-                    rook_x = 0
-                else:
-                    rook_x = BOARD_SIZE - 1
-                    # destination_x может быть равна только 3 или 5
-                self.board.move_piece(rook_x, source_y, 3 + 2 * sign(rook_x), source_y)
-            self.board.move_piece(source_x, source_y, destination_x, destination_y)
-            self.move_number += 1
-            # Если ход был сделан Ладьей или Королем, исключаем дальнейшую возможность соответствующих рокировок
-            if (source_x, source_y) == (0, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (0, 0):
-                self.possible_white_long_castling = False
-            if (source_x, source_y) == (7, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (7, 0):
-                self.possible_white_short_castling = False
-            if (source_x, source_y) == (0, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (0, 7):
-                self.possible_black_long_castling = False
-            if (source_x, source_y) == (7, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (7, 7):
-                self.possible_black_short_castling = False
-        else:
+        source_color = self.board.get_piece(source_x, source_y).get_color()
+        if self.whose_turn() != source_color:
+            raise ChessException("It's "+str(source_color.get_another_color())+' turn!')
+
+        if not self.is_move_correct(source_x, source_y, destination_x, destination_y):
             raise ChessException("Incorrect move")
+
+        # Если это рокировка, то ладью тоже нужно передвинуть
+        #self.previous_board = copy.deepcopy(self.board)
+        if self.check_castling(source_x, source_y, destination_x, destination_y):
+            if destination_x < source_x:
+                rook_x = 0
+            else:
+                rook_x = BOARD_SIZE - 1
+                # destination_x может быть равна только 3 или 5
+
+            self.add_step_to_notation_if_castling(source_x, source_y, destination_x, destination_y)
+            self.board.move_piece(rook_x, source_y, 3 + 2 * sign(rook_x), source_y)
+        else:
+            self.add_step_to_notation(source_x, source_y, destination_x, destination_y)
+
+        self.board.move_piece(source_x, source_y, destination_x, destination_y)
+
+        self.move_number += 1
+        if self.is_mate(ChessColor.Black) or self.is_mate(ChessColor.White):
+            self.result_notation_text += '#'
+        self.move_number -= 1
+
+        self.move_number += 1
+        # Если ход был сделан Ладьей или Королем, исключаем дальнейшую возможность соответствующих рокировок
+        if (source_x, source_y) == (0, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (0, 0):
+            self.possible_white_long_castling = False
+        if (source_x, source_y) == (7, 0) or (source_x, source_y) == (4, 0) or (destination_x, destination_y) == (7, 0):
+            self.possible_white_short_castling = False
+        if (source_x, source_y) == (0, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (0, 7):
+            self.possible_black_long_castling = False
+        if (source_x, source_y) == (7, 7) or (source_x, source_y) == (4, 7) or (destination_x, destination_y) == (7, 7):
+            self.possible_black_short_castling = False
+
+        if self.is_check(ChessColor.Black):
+            self.is_black_check = True
+        elif self.is_black_check:
+            self.is_black_check = False
+        if self.is_check(ChessColor.White):
+            self.is_white_check = True
+        elif self.is_white_check:
+            self.is_white_check = False
+
         #print(self.squares_changed_last_move())
 
     def squares_changed_last_move(self):
@@ -85,13 +132,27 @@ class ChessGame:
         return ChessColor.White
 
     def is_check(self, color):
+        # print(type(self.board.find_king(color)))
+        # self.board.show()
         (king_x, king_y) = self.board.find_king(color)
+        # print('looking for ', str(color), 'King === ', king_x,' ', king_y)
         return self.can_be_attacked(king_x, king_y, color)
+
+    def is_mate(self, color):
+        return self.is_check(color) and not self.can_this_color_fix_check(color)
+
+    def make_check_himself(self, source_x, source_y, destination_x, destination_y):
+        color = self.board.get_piece(source_x, source_y).get_color()
+        self.board.move_piece(source_x, source_y, destination_x, destination_y)
+        if self.is_check(color):
+            self.board.move_piece(destination_x, destination_y, source_x, source_y)
+            return True
+        self.board.move_piece(destination_x, destination_y, source_x, source_y)
+        return False
 
     # Проверяет, что
     # в клетке [source] есть фигура
     # если в клетке [destination] есть фигура, то она другого цвета
-    # TODO: если в [source] стоит король, то отдельно проверяем рокировку
     def is_move_correct(self, source_x, source_y, destination_x, destination_y):
         if self.board.is_empty(source_x, source_y):
             return False
@@ -104,7 +165,9 @@ class ChessGame:
         # Check the castling
         if self.check_castling(source_x, source_y, destination_x, destination_y):
             return True
-        return self.move_correct_checkers[piece_type](source_x, source_y, destination_x, destination_y)
+        # if self.make_check_himself(source_x, source_y, destination_x, destination_y):
+        #     return False
+        return move_correct_checkers[piece_type](self, source_x, source_y, destination_x, destination_y)
 
     def can_be_attacked(self, x, y, color):
         result = False
@@ -134,6 +197,8 @@ class ChessGame:
         checking_square = [source_x + factor_x, source_y]
         while self.board.is_empty(*checking_square) and 0 <= checking_square[0] < BOARD_SIZE:
             checking_square[0] += factor_x
+        if checking_square[0] < 0 or checking_square[0] >= BOARD_SIZE:
+            return False
         if self.board.get_piece(*checking_square).get_type() != ChessPieceType.Rook:
             return False
         # Проверка, что король не под шахом и поле, пересекаемое или занимаемое им, не атаковано
@@ -244,6 +309,43 @@ class ChessGame:
         return self.is_bishop_move_correct(source_x, source_y, destination_x, destination_y) or \
                self.is_rook_move_correct(source_x, source_y, destination_x, destination_y)
 
+    def get_number_of_string_in_notation(self):
+        return str((self.move_number+1)//2) + '. '
+
+    def add_step_to_notation(self, source_x, source_y, destination_x, destination_y):
+        moving_piece = self.board.get_piece(source_x, source_y)
+        if moving_piece.get_color() == ChessColor.White:
+            # str_step = '\n'*sign(self.game.move_number-1) + str((self.game.move_number+1)//2) + '. '
+            # str_step = ('\n' if self.game.move_number > 1 else '' ) + str((self.game.move_number+1)//2) + '. '
+            str_step = ('\n' if self.move_number > 1 else '') + self.get_number_of_string_in_notation()
+        else:
+            str_step = ' '
+        str_step += moving_piece.get_name_for_notation()
+        str_step += LETTERS_ON_BOARD[source_x] + str(source_y+1)
+        if self.board.is_empty(destination_x, destination_y):
+            str_step += '-'
+        else:
+            str_step += 'x'
+        str_step += LETTERS_ON_BOARD[destination_x] + str(destination_y+1)
+        self.result_notation_text += str_step
+
+    def add_step_to_notation_if_castling(self, source_x, source_y, destination_x, destination_y):
+        print('Da, castling dolzhna bit')
+        if (destination_x, destination_y) == (2, 0):
+            self.result_notation_text += '\n' + self.get_number_of_string_in_notation() + '0-0-0 '
+        if (destination_x, destination_y) == (2, 7):
+            self.result_notation_text += '0-0-0'
+        if (destination_x, destination_y) == (6, 0):
+            self.result_notation_text += '\n' + self.get_number_of_string_in_notation() + '0-0 '
+        if (destination_x, destination_y) == (6, 7):
+            self.result_notation_text += '0-0 '
+
+move_correct_checkers = {ChessPieceType.Pawn: ChessGame.is_pawn_move_correct,
+    ChessPieceType.Rook: ChessGame.is_rook_move_correct,
+    ChessPieceType.Bishop: ChessGame.is_bishop_move_correct,
+    ChessPieceType.Queen: ChessGame.is_queen_move_is_correct,
+    ChessPieceType.King: ChessGame.is_king_move_correct,
+    ChessPieceType.Knight: ChessGame.is_knight_move_correct}
 
 class ChessGameTest(unittest.TestCase):
     def setUp(self):
@@ -467,6 +569,29 @@ class ChessGameTest(unittest.TestCase):
         self.assertFalse(self.game.can_be_attacked(5, 6, ChessColor.Black))
         self.assertFalse(self.game.can_be_attacked(3, 4, ChessColor.White))
 
+    def test_notation(self):
+        self.assertEqual(self.game.result_notation_text, '')
+        self.game.move(4, 1, 4, 3)
+        self.game.move(5, 6, 5, 4)
+        self.game.move(4, 3, 5, 4)
+        self.game.move(6, 6, 6, 4)
+        self.game.move(3, 0, 7, 4)
+        self.assertEqual(self.game.result_notation_text, '1. e2-e4 f7-f5\n2. e4xf5 g7-g5\n3. Qd1-h5#')
+
+        self.game = ChessGame('Bob Marley', 'Demi Moor')
+        self.game.move(3, 1, 3, 3)
+        self.game.move(4, 6, 4, 4)
+        self.game.move(4, 1, 4, 3)
+        self.game.move(5, 7, 1, 3)
+        self.assertEqual(self.game.result_notation_text, '1. d2-d4 e7-e5\n2. e2-e4 Bf8-b4')
+
+        self.game = ChessGame('Bob Marley', 'Demi Moor')
+        try:
+            self.game.move(4, 1, 6, 2)
+        except:
+            pass
+        self.assertEqual(self.game.result_notation_text, '')
+
     def test_castling(self):
         self.assertFalse(self.game.is_move_correct(4, 0, 2, 0))
         self.game.board.clear_board()
@@ -474,6 +599,7 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.set_piece(4, 0, ChessPiece(ChessColor.White, ChessPieceType.King))
         self.game.board.set_piece(0, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
         self.game.board.set_piece(7, 0, ChessPiece(ChessColor.White, ChessPieceType.Rook))
+        self.game.board.set_piece(1, 7, ChessPiece(ChessColor.Black, ChessPieceType.King))
         self.assertTrue(self.game.check_castling(4, 0, 2, 0))
         self.assertTrue(self.game.is_move_correct(4, 0, 2, 0))
 
@@ -491,6 +617,7 @@ class ChessGameTest(unittest.TestCase):
         self.game.board.set_piece(4, 7, ChessPiece(ChessColor.Black, ChessPieceType.King))
         self.game.board.set_piece(0, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
         self.game.board.set_piece(7, 7, ChessPiece(ChessColor.Black, ChessPieceType.Rook))
+        self.game.board.set_piece(2, 5, ChessPiece(ChessColor.White, ChessPieceType.King))
         self.assertTrue(self.game.check_castling(4, 7, 2, 7))
         self.assertTrue(self.game.is_move_correct(4, 7, 2, 7))
 

@@ -25,6 +25,13 @@ class ChessPiece:
     def get_type(self):
         return self.type
 
+    def get_name_for_notation(self):
+        if self.type == ChessPieceType.Pawn:
+            return ''
+        if self.type == ChessPieceType.Knight:
+            return 'N'
+        return self.type.get_short_name()
+
 if __name__ == '__main__':
     piece1 = ChessPiece(ChessColor.White, ChessPieceType.Bishop)
     piece2 = ChessPiece(ChessColor.White, ChessPieceType.Bishop)
