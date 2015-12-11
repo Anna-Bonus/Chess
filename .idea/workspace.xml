@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="28a94a4d-7a4d-4fb8-b8a1-699fd820fa26" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ChessBoard.py" afterPath="$PROJECT_DIR$/ChessBoard.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ChessGame.py" afterPath="$PROJECT_DIR$/ChessGame.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WebUserInterface.py" afterPath="$PROJECT_DIR$/WebUserInterface.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/static/js/scripts.js" afterPath="$PROJECT_DIR$/web/static/js/scripts.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/static/css/style.css" afterPath="$PROJECT_DIR$/web/static/css/style.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/templates/template_board.html" afterPath="$PROJECT_DIR$/web/templates/template_board.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utils.py" afterPath="$PROJECT_DIR$/utils.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/views.py" afterPath="$PROJECT_DIR$/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="2015.10.05 Chess.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -74,10 +66,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="5.1724806" vertical-offset="0" max-vertical-offset="2992">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2992">
               <caret line="157" column="42" selection-start-line="157" selection-start-column="42" selection-end-line="157" selection-end-column="42" />
               <folding>
                 <element signature="e#0#60#0" expanded="true" />
@@ -116,14 +108,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ChessGame.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="ChessGame.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ChessGame.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.7586207" vertical-offset="195" max-vertical-offset="12138">
-              <caret line="23" column="39" selection-start-line="23" selection-start-column="39" selection-end-line="23" selection-end-column="39" />
+            <state vertical-scroll-proportion="0.19301848" vertical-offset="2388" max-vertical-offset="12002">
+              <caret line="146" column="35" selection-start-line="146" selection-start-column="35" selection-end-line="146" selection-end-column="35" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
-                <element signature="e#17439#17481#0" expanded="false" />
+                <element signature="e#17136#17178#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -172,11 +164,11 @@
         <option value="$PROJECT_DIR$/ChessBoard.py" />
         <option value="$PROJECT_DIR$/WebUserInterface.py" />
         <option value="$PROJECT_DIR$/web/__init__.py" />
-        <option value="$PROJECT_DIR$/ChessGame.py" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/web/templates/template_board.html" />
         <option value="$PROJECT_DIR$/views.py" />
         <option value="$PROJECT_DIR$/web/static/js/scripts.js" />
+        <option value="$PROJECT_DIR$/ChessGame.py" />
       </list>
     </option>
   </component>
@@ -1049,17 +1041,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ChessGame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.7586207" vertical-offset="195" max-vertical-offset="12138">
-          <caret line="23" column="39" selection-start-line="23" selection-start-column="39" selection-end-line="23" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#17439#17481#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/WebUserInterface.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="340">
@@ -1086,10 +1067,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.1724806" vertical-offset="0" max-vertical-offset="2992">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2992">
           <caret line="157" column="42" selection-start-line="157" selection-start-column="42" selection-end-line="157" selection-end-column="42" />
           <folding>
             <element signature="e#0#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ChessGame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.19301848" vertical-offset="2388" max-vertical-offset="12002">
+          <caret line="146" column="35" selection-start-line="146" selection-start-column="35" selection-end-line="146" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#17136#17178#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -9,7 +9,6 @@ from utils import sign
 from ChessException import ChessException
 import copy
 import string
-import time
 
 LETTERS_ON_BOARD = string.ascii_lowercase[0:BOARD_SIZE]
 __author__ = 'Анечка'
@@ -143,14 +142,7 @@ class ChessGame:
         return self.can_be_attacked(king_x, king_y, color)
 
     def is_mate(self, color):
-        t1 = time.time()
-        is_check = self.is_check(color)
-        t2 = time.time()
-        can_fix = not self.can_this_color_fix_check(color)
-        t3 = time.time()
-        # print('is_check:  ' + str(t2 - t1) + '    can_fix: ' + str(t3 - t2))
-        # return self.is_check(color) and not self.can_this_color_fix_check(color)
-        return is_check and can_fix
+        return self.is_check(color) and not self.can_this_color_fix_check(color)
 
     def make_check_himself(self, source_x, source_y, destination_x, destination_y):
         color = self.board.get_piece(source_x, source_y).get_color()
