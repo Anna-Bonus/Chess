@@ -14,7 +14,7 @@ table {
     display: inline-block;
 }
 
-.whose-turn {
+.game-info {
     display: inline-block;
     vertical-align: top;
 }

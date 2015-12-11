@@ -76,6 +76,12 @@ class ChessBoardTest(unittest.TestCase):
             for j in range(BOARD_SIZE):
                 self.assertTrue(board.is_empty(i, j))
 
+    def test_show_board(self):
+        board = ChessBoard()
+        board.set_start_position()
+        print(board.show())
+
+
 HORIZONTAL_BORDER = " +" + "=" * (BOARD_SIZE*3-1) + "+"
 LETTERS_ON_BOARD = '01234567'
 
@@ -109,19 +115,21 @@ class ChessBoard:
         return res
 
     def show(self):
+        res = ''
         for y in range(BOARD_SIZE-1, -1, -1):
-            print(y, '|', end='', sep='')
+            res += str(y) + '|'
             for x in range(BOARD_SIZE):
                 if self.is_empty(x, y):
-                    print("  |", end='')
+                    res += "  |"
                 else:
                     piece = self.get_piece(x, y)
-                    print(piece.get_color().get_short_name(), end='')
-                    print(piece.get_type().get_short_name(), end='|')
+                    res += piece.get_color().get_short_name()
+                    res += piece.get_type().get_short_name() + '|'
             if y > 0:
-                print('\n '+"+--"*8+"+")
-        print('\n', HORIZONTAL_BORDER, sep='')
-        print(' ', '  '.join(LETTERS_ON_BOARD))
+                res += '\n ' + "+--" * 8 + "+" + '\n'
+        res += '\n' + HORIZONTAL_BORDER + '\n'
+        res += '  '+'  '.join(LETTERS_ON_BOARD)
+        return res
 
     def is_empty(self, x, y):
         return self.board[x][y] is None

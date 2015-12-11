@@ -1,12 +1,13 @@
 <html>
 <head>
-      <title></title>
+      <title>Chess</title>
       <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
       <table border="0" cellspacing="0">
             {% for i in range(8) %}
                   <tr>
+                        <td>{{8-i}}</td>
                         {% for j in range(8) %}
                               {% if board.is_empty(j, 7-i) %}
                                     {% set piece = none %}
@@ -18,10 +19,25 @@
                               {% endwith %}
                         {% endfor %}
                   </tr>
+
+            {% endfor %}
+            {% for k in range(0, 9) %}
+                  <td align="center">{{" abcdefghijk"[k]}}</td>
             {% endfor %}
       </table>
 
-      <div class="whose-turn"></div>
+      <div class="game-info">
+            <div class="whose-turn"></div>
+            <div class="is-check"></div>
+            <div class="is-mate"></div>
+            <p>
+                  <form>
+                        <div class="input_name">white player <input name="white_name"><input name="white_surname"></div>
+                        <div class="input_name">black player <input name="black_name"><input name="black_surname"></div>
+                        <input type="submit" value="Отправить" class="send_names_button">
+                  </form>
+            </p>
+      </div>
 
       <script src="/static/js/jquery-1.11.3.js"></script>
       <script src="/static/js/scripts.js"></script>
