@@ -4,6 +4,11 @@
       <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+
+      <div class="create_new_game">
+            <input type="submit" value="Новая игра" class="new_game_button">
+      </div>
+      <div style="font-size:30px;" class="white_player"></div>
       <table border="0" cellspacing="0">
             {% for i in range(8) %}
                   <tr>
@@ -38,6 +43,8 @@
                   </form>
             </p>
       </div>
+
+      <div style="font-size:30px;" class="black_player" ></div>
 
       <script src="/static/js/jquery-1.11.3.js"></script>
       <script src="/static/js/scripts.js"></script>

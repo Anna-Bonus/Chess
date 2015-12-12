@@ -41,13 +41,13 @@ $(document).ready(function()
         else
         {
             $('table').hide();
+            $('.create_new_game').hide()
             console.log('Game hasn\'t begun');
         }
     }
      , 'json')
 
 
-    $('.whose-turn').text('White turn')
     $('img').click(function()
     {
         var x = $(this).parent().data('x');
@@ -88,16 +88,44 @@ $(document).ready(function()
         }
     });
 
-    $('.send_names_button').click(function(e){
+    $('.new_game_button').click(function(e)
+    {
         e.preventDefault();
+        $.post('/start_new_game', function(data){
+            console.log(data)
+            if (data.status == 'Ok')
+            {
+                console.log('new_game = true')
 
+                new_game = true
+            }
+            else new_game = False
+            if (new_game)
+            {
+                for (i = 0; i < 8; i++)
+                    for (j = 0; j < 8; j++)
+                        update_squares(i, j, data.board[i][j])
+                $('.whose-turn').text('White turn')
+            }
+
+        }, 'json')
+
+    })
+
+    $('.send_names_button').click(function (e){
+        e.preventDefault();
         var form = $(this).parents('form')[0];
         var form_data = $(form).serialize();
+
         $.post('/set_names', form_data, function(data){
             console.log(data);
             if (data.status == 'Ok')
             {
                 $('.game-info form').hide();
+                $('.white_player').text(data.white_player);
+                $('.black_player').text(data.black_player);
+                $('.whose-turn').text('White turn');
+                $('.create_new_game').show();
                 $('table').show()
             }
             else alert(data.message)

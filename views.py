@@ -148,7 +148,7 @@ def set_names():
     if request.form['white_name'] and request.form['white_surname'] and request.form['black_name'] and request.form['black_surname']:
         game.player_white = Player(request.form['white_name'], request.form['white_surname'])
         game.player_black = Player(request.form['black_name'], request.form['black_surname'])
-        return json.dumps({'status': 'Ok'})
+        return json.dumps({'status': 'Ok', 'white_player': str(game.player_white), 'black_player': str(game.player_black)})
     else:
         return json.dumps(({'status': 'Error', 'message': 'Wrong player\'s data'}))
 
@@ -164,6 +164,13 @@ def get_status():
     else:
         game_has_begun = True
     return json.dumps({'status': 'Ok', 'game_has_begun': game_has_begun, 'turn': str(game.whose_turn())})
+
+@board.route('/start_new_game', methods=['POST'])
+def start_new_game():
+    session = get_session()
+    games[session] = ChessGame(Player('a', 'b'), Player('c', 'd'))
+    game = games[session]
+    return json.dumps({'status': 'Ok', 'board': game.board.to_json_array()})
 
 @board.route('/hello')
 def hello():
